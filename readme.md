@@ -43,8 +43,8 @@ have different lengths when converted to strs. At the bottom, the commands are
 displayed across two lines:
 
 ```
-Commands: r[eplace] {lineno}|d[elete] {lineno}|i[nsert] {lineno}|a[ppend]
-          o[ffset] {lines}|n[ext]|p[revious]|s[elect] {pageno}|w[rite]|q[uit]
+Commands: [r]e[place] {lineno}|d[elete] {lineno}|i[nsert] {lineno}|a[ppend]|u[ndo]{count=1}
+          r[edo] {count=1}|o[ffset] {lines}|n[ext]|p[revious]|s[elect] {pageno}|w[rite]|q[uit]
 ```
 
 Then there is a simple prompt with a question mark. If you do not specify a
