@@ -43,8 +43,8 @@ def pad_line_no(i: int, max_i: int) -> str:
     return str(i)
 
 def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
-    applied_edits: deque[Edit] = deque(maxlen=history_buffer_size)
-    undone_edits: deque[Edit] = deque(maxlen=history_buffer_size)
+    applied_edits: deque[Edit] = deque([], history_buffer_size)
+    undone_edits: deque[Edit] = deque([], history_buffer_size)
 
     def undo():
         if not len(applied_edits):
