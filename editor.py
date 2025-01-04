@@ -35,7 +35,7 @@ def edit(fpath: str, page_size: int = 43):
         for i in range(start, stop):
             line = lines[i]
             spaces = len(line) - len(line.lstrip())
-            line = ''.join(['·' for _ in range(spaces)]) + line.lstrip()
+            line = ''.join([' ' if i % 4 else '_' for i in range(spaces)]) + line.lstrip()
             print(f"[{pad_line_no(i, stop-1)}]: {line}")
 
         print("\nCommands: r[eplace] {lineno}|d[elete] {lineno}|i[nsert] {lineno}|a[ppend]\n" + \
