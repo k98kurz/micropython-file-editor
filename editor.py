@@ -115,7 +115,7 @@ def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
             error = None
 
         command = input("? ").split(' ')
-        index = int(command[1]) if len(command) > 1 else 0
+        index = int(f"0{command[1]}") if len(command) > 1 else 0
 
         if command[0] in ('e', 'replace'):
             if len(command) != 2:
