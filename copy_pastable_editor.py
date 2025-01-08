@@ -62,10 +62,11 @@ def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
         elif ed.command == 'i':
             if ed.args[0] >= len(lines) or lines[ed.args[0]] != ed.new_line:
                 return
-            lines[ed.args[0]] = ed.old_line
+            del lines[ed.args[0]]
         elif ed.command == 'a':
             if lines[-1] != ed.new_line:
                 return
+        del lines[-1]
         undone_edits.append(ed)
 
     def redo():
@@ -93,13 +94,14 @@ def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
     error = ''
     offset = 0
     while True:
-        start = page * page_size + offset
-        stop = min((page + 1) * page_size + offset, len(lines))
         if hasattr(os, 'system') and hasattr(os, 'name'):
             try:
                 os.system('cls' if os.name == 'nt' else 'clear')
             except:
                 ...
+
+        start = page * page_size + offset
+        stop = min((page + 1) * page_size + offset, len(lines))
         print(f"Displaying lines {start}-{stop-1}")
 
         for i in range(start, stop):
@@ -108,50 +110,65 @@ def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
             line = ''.join([' ' if i % 4 else '_' for i in range(spaces)]) + line.lstrip()
             print(f"[{pad_line_no(i, stop-1)}]: {line}")
 
-        print("\\nCommands: [r]e[place] {lineno}|d[elete] {lineno}|i[nsert] {lineno}|a[ppend]|u[ndo]{count=1}\\n" + \\
-            "          r[edo] {count=1}|o[ffset] {lines}|n[ext]|p[revious]|s[elect] {pageno}|w[rite]|q[uit]")
+        print("\\nCommands: [r]e[place] {lineno} {count=1}|d[elete] {lineno} {count=1}|i[nsert] {lineno} {count=1}|a[ppend] {count=1}\\n" + \\
+            "          u[ndo] {count=1}|r[edo] {count=1}|o[ffset] {lines}|n[ext]|p[revious]|s[elect] {pageno}|w[rite]|q[uit]")
         if error:
             print(error)
             error = None
 
         command = input("? ").split(' ')
         index = int(f"0{command[1]}") if len(command) > 1 else 0
+        index = 0 if index < 0 else index
+        count = int(f"0{command[2]}") if len(command) > 2 else 1
+        count = 1 if count < 0 else count
 
         if command[0] in ('e', 'replace'):
-            if len(command) != 2:
+            if len(command) < 2:
                 error = 'Must specify a line index for replace'
                 continue
-            line = input('')
-            if line:
-                ed = Edit('e', [index], lines[index], line)
-                lines[index] = line
-                applied_edits.append(ed)
+            end = index + count
+            while index < end:
+                line = input('')
+                if line:
+                    ed = Edit('e', [index], lines[index], line)
+                    lines[index] = line
+                    applied_edits.append(ed)
+                index += 1
 
         elif command[0] in ('d', 'delete'):
-            if len(command) != 2:
+            if len(command) < 2:
                 error = 'Must specify a line index for delete'
                 continue
-            applied_edits.append(Edit('d', [index], lines[index], None))
-            del lines[index]
+            while count > 0:
+                applied_edits.append(Edit('d', [index], lines[index], None))
+                del lines[index]
+                count -= 1
 
         elif command[0] in ('i', 'insert'):
-            if len(command) != 2:
+            if len(command) < 2:
                 error = 'Must specify a line index for insert'
                 continue
-            line = input('')
-            lines.insert(index, line)
-            applied_edits.append(Edit('i', [index], None, line))
+            end = index + count
+            while index < end:
+                line = input('')
+                lines.insert(index, line)
+                applied_edits.append(Edit('i', [index], None, line))
+                index += 1
 
         elif command[0] in ('a', 'append'):
-            line = input('')
-            lines.append(line)
-            applied_edits.append(Edit('a', [], None, line))
+            if index > 0:
+                count = index
+            while count > 0:
+                line = input('')
+                lines.append(line)
+                applied_edits.append(Edit('a', [], None, line))
+                count -= 1
 
         elif command[0] in ('u', 'undo'):
             undo()
             while index > 1:
                 index -= 1
-                undo
+                undo()
 
         elif command[0] in ('r', 'redo'):
             redo()
@@ -160,7 +177,7 @@ def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
                 redo()
 
         elif command[0] in ('o', 'offset'):
-            if len(command) != 2:
+            if len(command) < 2:
                 error = 'Must specify a line count for offset'
                 continue
             offset = index
@@ -172,7 +189,7 @@ def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
             page = len(lines) // page_size if page == 0 else page - 1
 
         elif command[0] in ('s', 'select'):
-            if len(command) != 2:
+            if len(command) < 2:
                 error = 'Must specify a page index to select a page'
                 continue
             if index * page_size < len(lines):
