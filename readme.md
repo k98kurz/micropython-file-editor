@@ -1,12 +1,23 @@
 # Micropython file editor
 
 The purpose of this tool is to allow users of micropython devices to edit files
-through a tty serial terminal connection. It is very simple, but it has the
-nice feature that preceding spaces are displayed with an underscore at the
-beginning of every 4 spaces.
+through a tty serial terminal connection. It is simple, but it has some nice
+features:
 
-This can also be used outside of micropython, but why would you use this when
-you can use vim?
+1. Preceding spaces are displayed with an underscore at the beginning of every 4
+spaces.
+2. It uses a paging and offset system to scroll through a file, displaying only
+what can be contained in your terminal (determined by the parameter passed to
+the `edit` function).
+3. There is an edit history buffer with up to 100 applied and undone edits, so
+you can undo or redo edits.
+4. It keeps a checksum of the `applied_edits` buffer on file read and write to
+detect unsaved edits when the "quit" command is run, which then requires
+confirmation to abandon those edits. This also detects when edits have been
+undone after the last file write.
+
+This can be used outside of micropython, but why would you use this when you can
+use vim?
 
 ## Installation
 
@@ -18,9 +29,9 @@ file into the proper directory for your build process.
     1. Run `python make_pastable.py > pastable_editor.txt` to generate a file
 with doubled backslashes
     2. Open the file and copy its contents
-    3. Type `data = """` into the REPL
+    3. Type `data = '''` into the REPL
     4. Paste the file contents
-    5. Type `"""` and enter
+    5. Type `'''` and enter
     6. Type `with open('/path/to/libs/editor.py', 'w') as f:` and enter
     7. Type `    f.write(data)` and enter, deindent if necessary, and enter again
 
