@@ -21,7 +21,7 @@ use vim?
 
 ## Installation
 
-There are two ways to install this:
+There are two ways to install this on a micropython-enabled microcontroller:
 
 1. Including in a custom firmware, in which case you need to copy the `edit.py`
 file into the proper directory for your build process.
@@ -40,6 +40,8 @@ in this way. I will try to remember to update it whenever I update the main
 editor code; running the step 2.1 will guarantee it is up-to-date.
 
 ## Usage
+
+### Micropython REPL
 
 To use, first `import edit from editor`, then `edit('/path/to/file', page_size)`
 to begin the interactive editor. The `page_size` parameter has a default of 43
@@ -62,6 +64,20 @@ Then there is a simple prompt with a question mark. If you do not specify a
 required argument for a command, the screen will redraw, and an error message
 will be printed; this may cause the top line showing which lines are displayed
 to scroll out of focus.
+
+### CLI
+
+If you want to use this with the CLI from a non-REPL terminal, you can execute
+it with the path of the file you want to edit and optionally the page size as
+parameters:
+
+```bash
+python editor.py /path/to/file.txt 42
+```
+
+For a Posix system, you can add a shebang to the top, make it executable, and
+move it somewhere it is accessible from your environment's path if you want to.
+The interactive interface is the same as above.
 
 ## License
 

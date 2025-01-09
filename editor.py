@@ -1,5 +1,6 @@
 from binascii import crc32
 from collections import deque, namedtuple
+from sys import argv
 import os
 
 
@@ -232,4 +233,14 @@ def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
                     break
             else:
                 break
+
+
+if __name__ == '__main__':
+    if len(argv) > 1:
+        filename = argv[1]
+        page_size = int(f"0{argv[2]}") if len(argv) > 2 else 0
+        if page_size:
+            edit(filename, page_size)
+        else:
+            edit(filename)
 
