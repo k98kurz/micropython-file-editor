@@ -1,3 +1,4 @@
+from binascii import crc32
 from collections import deque, namedtuple
 import os
 
@@ -25,6 +26,17 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 Edit = namedtuple('Edit', ['command', 'args', 'old_line', 'new_line'])
 
+def Edit_to_bytes(edit: Edit) -> bytes:
+    val = edit.command.encode()
+    val = val + len(edit.args).to_bytes(1, 'big')
+    for arg in edit.args:
+        val = val + arg.to_bytes(2, 'big')
+    if edit.old_line:
+        val = val + edit.old_line.encode()
+    if edit.new_line:
+        val = val + edit.new_line.encode()
+    return val
+
 
 def read_file(fpath: str) -> list[str]:
     try:
@@ -42,7 +54,19 @@ def pad_line_no(i: int, max_i: int) -> str:
         return f'0{i}'
     return str(i)
 
+def checksum(edit_buffer: deque[Edit] = None, lines: list[str] = None) -> int:
+    """Calculate a checksum for an edit buffer and/or lines of text."""
+    val = 0
+    if edit_buffer:
+        for i in range(len(edit_buffer)):
+            val = crc32(Edit_to_bytes(edit_buffer[i]), val)
+    if lines:
+        for i in range(len(lines)):
+            val = crc32(lines[i].encode(), val)
+    return val
+
 def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
+    """Edit a file. This is the main function for this library."""
     applied_edits: deque[Edit] = deque([], history_buffer_size)
     undone_edits: deque[Edit] = deque([], history_buffer_size)
 
@@ -90,6 +114,7 @@ def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
         applied_edits.append(ed)
 
     lines = read_file(fpath)
+    check = checksum(applied_edits)
     page = 0
     error = ''
     offset = 0
@@ -197,8 +222,15 @@ def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
 
         elif command[0] in ('w', 'write'):
             write_file(fpath, lines)
+            check = checksum(applied_edits)
 
         elif command[0] in ('q', 'quit'):
-            break
+            if check != checksum(applied_edits):
+                print('Unsaved edits detected. Are you sure you want to quit?')
+                confirm = input('[y/N]: ')
+                if confirm.lower() in ('y', 'yes'):
+                    break
+            else:
+                break
 
 
