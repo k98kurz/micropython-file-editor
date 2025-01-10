@@ -66,10 +66,11 @@ def checksum(edit_buffer: deque[Edit] = None, lines: list[str] = None) -> int:
             val = crc32(lines[i].encode(), val)
     return val
 
-def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
+def edit(fpath: str, page_size: int = 42, history_buffer_size: int = 100):
     """Edit a file. This is the main function for this library."""
     applied_edits: deque[Edit] = deque([], history_buffer_size)
     undone_edits: deque[Edit] = deque([], history_buffer_size)
+    original_page_size = page_size
 
     def undo():
         if not len(applied_edits):
@@ -137,12 +138,13 @@ def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
             print(f"[{pad_line_no(i, stop-1)}]: {line}")
 
         print("\nCommands: [r]e[place] {lineno} {count=1}|d[elete] {lineno} {count=1}|i[nsert] {lineno} {count=1}|a[ppend] {count=1}\n" + \
-            "          u[ndo] {count=1}|r[edo] {count=1}|o[ffset] {lines}|n[ext]|p[revious]|s[elect] {pageno}|w[rite]|q[uit]")
+            "          c[hange] {pagesize=42}|o[ffset] {lines}|n[ext]|p[revious]|s[elect] {pageno}\n" + \
+            "          u[ndo] {count=1}|r[edo] {count=1}|w[rite]|q[uit]")
         if error:
             print(error)
             error = None
 
-        command = input("? ").split(' ')
+        command = input("? ").lower().split(' ')
         index = int(f"0{command[1]}") if len(command) > 1 else 0
         index = 0 if index < 0 else index
         count = int(f"0{command[2]}") if len(command) > 2 else 1
@@ -201,6 +203,11 @@ def edit(fpath: str, page_size: int = 43, history_buffer_size: int = 100):
             while index > 1:
                 index -= 1
                 redo()
+
+        elif command[0] in ('c', 'change'):
+            if len(command) < 2:
+                index = original_page_size
+            page_size = index
 
         elif command[0] in ('o', 'offset'):
             if len(command) < 2:
