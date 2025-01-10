@@ -44,26 +44,34 @@ editor code; running the step 2.1 will guarantee it is up-to-date.
 ### Micropython REPL
 
 To use, first `import edit from editor`, then `edit('/path/to/file', page_size)`
-to begin the interactive editor. The `page_size` parameter has a default of 43
-because that works well in my terminal when I use screen, but you will want to
-tune this to fit your setup.
+to begin the interactive editor. The `page_size` parameter has a default of 42
+because that is the Ultimate Answer to Life, The Universe, and Everything --
+actually, it just works well in my terminal when I use screen, but you will want
+to tune this to fit your setup. You can change it while editing with the 'c {x}'
+('change {pagesize}') command.
 
 The interface is simple. The first line printed says the range of lines that are
-printed, e.g. 'Displaying lines 0-42' or 'Displaying lines 43-85'. Then a page of
+printed, e.g. 'Displaying lines 0-41' or 'Displaying lines 42-83'. Then a page of
 lines are listed, each preceded with padded line numbers in brackets, e.g.
 '[04]:'. Line numbers are padded only when the range includes line numbers that
 have different lengths when converted to strs. At the bottom, the commands are
 displayed across two lines:
 
 ```
-Commands: [r]e[place] {lineno}|d[elete] {lineno}|i[nsert] {lineno}|a[ppend]|u[ndo]{count=1}
-          r[edo] {count=1}|o[ffset] {lines}|n[ext]|p[revious]|s[elect] {pageno}|w[rite]|q[uit]
+Commands: [r]e[place] {lineno} {count=1}|d[elete] {lineno} {count=1}|i[nsert] {lineno} {count=1}|a[ppend] {count=1}
+          c[hange] {pagesize=42}|o[ffset] {lines}|n[ext]|p[revious]|s[elect] {pageno}
+          u[ndo] {count=1}|r[edo] {count=1}|w[rite]|q[uit]
 ```
 
-Then there is a simple prompt with a question mark. If you do not specify a
-required argument for a command, the screen will redraw, and an error message
-will be printed; this may cause the top line showing which lines are displayed
-to scroll out of focus.
+Then there is a simple prompt with a question mark. Type the command you want
+to run and hit enter. If you do not specify a required argument for a command,
+the screen will redraw, and an error message will be printed; this may cause the
+top line showing which lines are displayed to scroll out of focus.
+
+You can type either the full command or the short command, which is the single
+character not enclosed in square brackets. For replace, insert, and append,
+there will be an empty prompt for each line required to complete the command. An
+empty line will be accepted as an empty line. Commands are case insensitive.
 
 ### CLI
 
