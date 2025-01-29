@@ -102,7 +102,7 @@ def edit(fpath: str, page_size: int = 42, history_buffer_size: int = 100):
         if ed.command == 'e':
             if ed.args[0] >= len(lines) or lines[ed.args[0]] != ed.old_line:
                 return
-            lines[ed.args[0]] = ed.new_ilne
+            lines[ed.args[0]] = ed.new_line
         elif ed.command == 'd':
             if ed.args[0] >= len(lines) or lines[ed.args[0]] != ed.old_line:
                 return
