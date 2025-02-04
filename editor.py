@@ -39,6 +39,71 @@ def Edit_to_bytes(edit: Edit) -> bytes:
     return val
 
 
+def cat(fname: str) -> str:
+    """Returns the str contents of a file. Intended to be used with
+        `print` or another utility function from this library.
+    """
+    with open(fname, 'r') as f:
+        return f.read()
+
+def to_lines(data: str) -> list[str]:
+    return data.split('\n')
+
+def from_lines(data: list[str]) -> str:
+    return '\n'.join(data)
+
+def number_lines(data: str|list[str]) -> str:
+    """Prepends each line with its line number."""
+    data = to_lines(data) if type(data) is str else data
+    max_i = len(data)
+    for i in range(len(data)):
+        data[i] = f'[{pad_line_no(i, max_i)}]: {data[i]}'
+    return from_lines(data)
+
+def page(data: str|list[str], index: int = 0, offset: int = 0, size: int = 46, linenos: bool = False) -> str:
+    """Given file contents, return a specific page. If linenos=True,
+        each line will have its line number prepended. Intended to be
+        used with `print` on output from `cat`.
+    """
+    data = to_lines(data) if type(data) is str else data
+
+    if index * size + offset < len(data):
+        if len(data) > size * (index + 1) + offset:
+            data = data[size*index+offset:size*(index+1)+offset]
+        else:
+            data = data[size*index+offset:]
+    elif size + offset < len(data):
+        data = data[offset:offset+size]
+    elif size < len(data):
+        data = data = data[:size]
+
+    if linenos:
+        max_i = len(data)
+        for i in range(len(data)):
+            data[i] = f'[{pad_line_no(i, max_i)}]: {data[i]}'
+    return from_lines(data)
+
+def grep(data: str|list[str], search: str|list[str]) -> str:
+    """Searches the given data for the search term[s]. Returns all
+        matched lines; each matching line will be prepended with its
+        line number. Intended to be used with `print` on output from
+        `cat`.
+    """
+    data = to_lines(data) if type(data) is str else data
+    matches = []
+    max_i = len(data) - 1
+
+    for i, line in enumerate(data):
+        if type(search) is str and search in line:
+            matches.append(f'{pad_line_no(i, max_i)}: {line}')
+        elif type(search) is list:
+            for s in search:
+                if s in line:
+                    matches.append(f'{pad_line_no(i, max_i)}: {line}')
+                    break
+
+    return from_lines(matches)
+
 def read_file(fpath: str) -> list[str]:
     try:
         with open(fpath, 'r') as f:
@@ -51,9 +116,11 @@ def write_file(fpath: str, lines: list[str]):
         f.write('\n'.join(lines))
 
 def pad_line_no(i: int, max_i: int) -> str:
-    if len(str(max_i)) > len(str(i)):
-        return f'0{i}'
-    return str(i)
+    i = str(i)
+    max_i = str(max_i)
+    while len(max_i) > len(i):
+        i = f'0{i}'
+    return i
 
 def checksum(edit_buffer: deque[Edit] = None, lines: list[str] = None) -> int:
     """Calculate a checksum for an edit buffer and/or lines of text."""
