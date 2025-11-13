@@ -323,4 +323,7 @@ if __name__ == '__main__':
             edit(filename, page_size)
         else:
             edit(filename)
+    else:
+        print(f'Usage: {argv[0]} /path/to/file [page_size]')
+        print('       The page_size parameter is optional; default is 42')
 
