@@ -1,3 +1,5 @@
+#!/bin/python
+
 from binascii import crc32
 from collections import deque, namedtuple
 from sys import argv
@@ -211,11 +213,15 @@ def edit(fpath: str, page_size: int = 42, history_buffer_size: int = 100):
             print(error)
             error = None
 
-        command = input("? ").lower().split(' ')
-        index = int(f"0{command[1]}") if len(command) > 1 else 0
-        index = 0 if index < 0 else index
-        count = int(f"0{command[2]}") if len(command) > 2 else 1
-        count = 1 if count < 0 else count
+        command = input("? ").lower().lstrip().split(' ')
+        try:
+            index = int(f"0{command[1]}") if len(command) > 1 else 0
+            index = 0 if index < 0 else index
+            count = int(f"0{command[2]}") if len(command) > 2 else 1
+            count = 1 if count < 0 else count
+        except Exception as e:
+            error = str(e)
+            continue
 
         if command[0] in ('e', 'replace'):
             if len(command) < 2:
